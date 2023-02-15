@@ -26,6 +26,11 @@ type InvokeMatchParameter struct {
 	userdata unsafe.Pointer
 }
 
+// 接管 C.mms_stack_t 类型
+func TakeOverString(data C.mms_stack_t) *String {
+	return &String{data: data}
+}
+
 func CreateString() *String {
 	s := &String{}
 	C.MemeStringStack_init(&s.data, C.MMS__OBJECT_SIZE)
