@@ -1,0 +1,5 @@
+package memego
+
+/*
+ */
+import "C"
