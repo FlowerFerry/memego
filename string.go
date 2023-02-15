@@ -27,7 +27,7 @@ type InvokeMatchParameter struct {
 }
 
 // 接管 C.mms_stack_t 类型
-func TakeOverString(data C.mms_stack_t) *String {
+func CreateStringWithTakeOver(data C.mms_stack_t) *String {
 	return &String{data: data}
 }
 
