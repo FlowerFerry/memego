@@ -1,2 +1,2 @@
 # memego
-## Pembungkus golang perpustakaan MemeString
+## A golang wrapper for the MemeString library
