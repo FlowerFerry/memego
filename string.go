@@ -11,7 +11,7 @@ import (
 #include <stdlib.h>
 #include "meme/string.h"
 
-MemeInteger_t mmsinvoke_match_cond_byte_fn(MemeByte_t byte, void* userdata);
+MemeInteger_t mmgoinvoke_match_cond_byte_fn(MemeByte_t byte, void* userdata);
 */
 import "C"
 
@@ -80,7 +80,7 @@ func CreateStringByBytes(bytes []byte) (*String, int) {
 
 func CreateStringByOther(str *String) (*String, int) {
 	s := CreateString()
-	result := s.assignByOther(str)
+	result := s.AssignByOther(str)
 	if result != 0 {
 		return nil, result
 	}
@@ -97,17 +97,17 @@ func CreateStringByCStr(cstr *C.char, len C.size_t) (*String, int) {
 	return s, 0
 }
 
-func (s *String) destroy() {
+func (s *String) Destroy() {
 	C.MemeStringStack_unInit(&s.data, C.MMS__OBJECT_SIZE)
 }
 
-func (s *String) assignByGoStr(str string) int {
+func (s *String) AssignByGoStr(str string) int {
 	other, rc := CreateStringByGoStr(str)
 	if rc != 0 {
 		return rc
 	}
-	defer other.destroy()
-	return s.assignByOther(other)
+	defer other.Destroy()
+	return s.AssignByOther(other)
 
 	//cstr := C.CString(str)
 	//defer C.free(unsafe.Pointer(cstr))
@@ -117,13 +117,13 @@ func (s *String) assignByGoStr(str string) int {
 	//return int(result)
 }
 
-func (s *String) assignByBytes(bytes []byte) int {
+func (s *String) AssignByBytes(bytes []byte) int {
 	other, rc := CreateStringByBytes(bytes)
 	if rc != 0 {
 		return rc
 	}
-	defer other.destroy()
-	return s.assignByOther(other)
+	defer other.Destroy()
+	return s.AssignByOther(other)
 
 	//result := C.MemeStringStack_assignByU8bytes(
 	//	&s.data, C.MMS__OBJECT_SIZE,
@@ -131,152 +131,152 @@ func (s *String) assignByBytes(bytes []byte) int {
 	//return int(result)
 }
 
-func (s *String) assignByOther(str *String) int {
+func (s *String) AssignByOther(str *String) int {
 	result := C.MemeStringStack_assign(
-		&s.data, C.MMS__OBJECT_SIZE, str.toMms())
+		&s.data, C.MMS__OBJECT_SIZE, str.ToMms())
 	return int(result)
 }
 
-func (s *String) assignByCStr(cstr *C.char, len C.size_t) int {
+func (s *String) AssignByCStr(cstr *C.char, len C.size_t) int {
 	result := C.MemeStringStack_assignByU8bytes(
 		&s.data, C.MMS__OBJECT_SIZE, (*C.uchar)(unsafe.Pointer(cstr)), C.MemeInteger_t(len))
 	return int(result)
 }
 
 // clear
-func (s *String) clear() {
+func (s *String) Clear() {
 	C.MemeStringStack_reset(&s.data, C.MMS__OBJECT_SIZE)
 }
 
-func (s *String) isEmpty() bool {
-	return C.MemeString_isEmpty(s.toMms()) != 0
+func (s *String) IsEmpty() bool {
+	return C.MemeString_isEmpty(s.ToMms()) != 0
 }
 
 // get btye size
-func (s *String) size() int {
-	return int(C.MemeString_byteSize(s.toMms()))
+func (s *String) Size() int {
+	return int(C.MemeString_byteSize(s.ToMms()))
 }
 
-func (s *String) sizeToInteger() C.MemeInteger_t {
-	return C.MemeString_byteSize(s.toMms())
+func (s *String) SizeToInteger() C.MemeInteger_t {
+	return C.MemeString_byteSize(s.ToMms())
 }
 
-func (s *String) cstr() *C.char {
-	return C.MemeString_cStr(s.toMms())
+func (s *String) CStr() *C.char {
+	return C.MemeString_cStr(s.ToMms())
 }
 
-func (s *String) isSharedStorage() bool {
-	return C.MemeString_isSharedStorageTypes(s.toMms()) != 0
+func (s *String) IsSharedStorage() bool {
+	return C.MemeString_isSharedStorageTypes(s.ToMms()) != 0
 }
 
-func (s *String) equal(str *String) bool {
+func (s *String) Equal(str *String) bool {
 	result := C.int(0)
 	C.MemeString_isEqualWithOther(
-		s.toMms(), str.toMms(), &result)
+		s.ToMms(), str.ToMms(), &result)
 	return result != 0
 }
 
-func (s *String) notEqual(str *String) bool {
-	return !s.equal(str)
+func (s *String) NotEqual(str *String) bool {
+	return !s.Equal(str)
 }
 
-func (s *String) equalGoStr(str string) bool {
+func (s *String) EqualGoStr(str string) bool {
 	b := []byte(str)
 	result := C.int(0)
 	C.MemeString_isEqual(
-		s.toMms(), (*C.char)(unsafe.Pointer(&b[0])), C.MemeInteger_t(len(b)), &result)
+		s.ToMms(), (*C.char)(unsafe.Pointer(&b[0])), C.MemeInteger_t(len(b)), &result)
 	return result != 0
 }
 
-func (s *String) notEqualGoStr(str string) bool {
-	return !s.equalGoStr(str)
+func (s *String) NotEqualGoStr(str string) bool {
+	return !s.EqualGoStr(str)
 }
 
-func (s *String) equalBytes(bytes []byte) bool {
+func (s *String) EqualBytes(bytes []byte) bool {
 	result := C.int(0)
 	C.MemeString_isEqual(
-		s.toMms(), (*C.char)(unsafe.Pointer(&bytes[0])), C.MemeInteger_t(len(bytes)), &result)
+		s.ToMms(), (*C.char)(unsafe.Pointer(&bytes[0])), C.MemeInteger_t(len(bytes)), &result)
 	return result != 0
 }
 
-func (s *String) notEqualBytes(bytes []byte) bool {
-	return !s.equalBytes(bytes)
+func (s *String) NotEqualBytes(bytes []byte) bool {
+	return !s.EqualBytes(bytes)
 }
 
-func (s *String) equalCStr(cstr *C.char, len C.size_t) bool {
+func (s *String) EqualCStr(cstr *C.char, len C.size_t) bool {
 	result := C.int(0)
 	C.MemeString_isEqual(
-		s.toMms(), (*C.char)(unsafe.Pointer(cstr)), C.MemeInteger_t(len), &result)
+		s.ToMms(), (*C.char)(unsafe.Pointer(cstr)), C.MemeInteger_t(len), &result)
 	return result != 0
 }
 
-func (s *String) notEqualCStr(cstr *C.char, len C.size_t) bool {
-	return !s.equalCStr(cstr, len)
+func (s *String) NotEqualCStr(cstr *C.char, len C.size_t) bool {
+	return !s.EqualCStr(cstr, len)
 }
 
-func (s *String) toMms() C.mms_t {
+func (s *String) ToMms() C.mms_t {
 	return C.mms_t(unsafe.Pointer(&s.data))
 }
 
-func (s *String) toString() string {
-	return C.GoStringN(s.cstr(), C.int(s.sizeToInteger()))
+func (s *String) ToString() string {
+	return C.GoStringN(s.CStr(), C.int(s.SizeToInteger()))
 }
 
-func (s *String) toBytes() []byte {
-	return C.GoBytes(unsafe.Pointer(s.cstr()), C.int(s.sizeToInteger()))
+func (s *String) ToBytes() []byte {
+	return C.GoBytes(unsafe.Pointer(s.CStr()), C.int(s.SizeToInteger()))
 }
 
 // to en unpper
-func (s *String) toEnUpper() *String {
+func (s *String) ToEnUpper() *String {
 	stack := C.MemeStringStack_toEnUpper(&s.data, C.MMS__OBJECT_SIZE)
 	return &String{data: stack}
 }
 
 // to en lower
-func (s *String) toEnLower() *String {
+func (s *String) ToEnLower() *String {
 	stack := C.MemeStringStack_toEnLower(&s.data, C.MMS__OBJECT_SIZE)
 	return &String{stack}
 }
 
 // trim space
-func (s *String) trimSpace() *String {
+func (s *String) TrimSpace() *String {
 	stack := C.MemeStringStack_trimSpace(&s.data, C.MMS__OBJECT_SIZE)
 	return &String{stack}
 }
 
 // trim left space
-func (s *String) trimLeftSpace() *String {
+func (s *String) TrimLeftSpace() *String {
 	stack := C.MemeStringStack_trimLeftSpace(&s.data, C.MMS__OBJECT_SIZE)
 	return &String{stack}
 }
 
 // trim right space
-func (s *String) trimRightSpace() *String {
+func (s *String) TrimRightSpace() *String {
 	stack := C.MemeStringStack_trimRightSpace(&s.data, C.MMS__OBJECT_SIZE)
 	return &String{stack}
 }
 
-func (s *String) trimByCondByteFn(fn MatchCondByteFn, user unsafe.Pointer) *String {
+func (s *String) TrimByCondByteFn(fn MatchCondByteFn, user unsafe.Pointer) *String {
 	param := &InvokeMatchParameter{
 		condFn:   fn,
 		userdata: user,
 	}
 	stack := C.MemeStringStack_trimByCondByteFunc(
 		&s.data, C.MMS__OBJECT_SIZE,
-		(*C.MemeString_MatchCondByteFunc_t)(unsafe.Pointer(C.mmsinvoke_match_cond_byte_fn)),
+		(*C.MemeString_MatchCondByteFunc_t)(unsafe.Pointer(C.mmgoinvoke_match_cond_byte_fn)),
 		unsafe.Pointer(param))
 	return &String{stack}
 }
 
 // mid
-func (s *String) mid(start int, length int) *String {
+func (s *String) Mid(start int, length int) *String {
 	stack := C.MemeStringStack_mid(
 		&s.data, C.MMS__OBJECT_SIZE, C.MemeInteger_t(start), C.MemeInteger_t(length))
 	return &String{stack}
 }
 
-func (s *String) at(index int) (byte, bool) {
-	p := C.MemeString_at(s.toMms(), C.MemeInteger_t(index))
+func (s *String) At(index int) (byte, bool) {
+	p := C.MemeString_at(s.ToMms(), C.MemeInteger_t(index))
 	if p == nil {
 		return 0, false
 	}
@@ -284,155 +284,155 @@ func (s *String) at(index int) (byte, bool) {
 }
 
 // storage type
-func (s *String) storageType() Storage_t {
-	return Storage_t(C.MemeString_storageType(s.toMms()))
+func (s *String) StorageType() Storage_t {
+	return Storage_t(C.MemeString_storageType(s.ToMms()))
 }
 
-func (s *String) indexOf(str *String) int {
+func (s *String) IndexOf(str *String) int {
 	return int(C.MemeString_indexOfWithOther(
-		s.toMms(),
+		s.ToMms(),
 		C.MemeInteger_t(0),
-		str.toMms(),
+		str.ToMms(),
 		C.MemeFlag_CaseSensitive))
 }
 
-func (s *String) indexOfWithStartIndex(str *String, startIndex int) int {
+func (s *String) IndexOfWithStartIndex(str *String, startIndex int) int {
 	return int(C.MemeString_indexOfWithOther(
-		s.toMms(),
+		s.ToMms(),
 		C.MemeInteger_t(startIndex),
-		str.toMms(),
+		str.ToMms(),
 		C.MemeFlag_CaseSensitive))
 }
 
-func (s *String) indexOfGoStr(str string) int {
+func (s *String) IndexOfGoStr(str string) int {
 	b := []byte(str)
 	return int(C.MemeString_indexOfWithUtf8bytes(
-		s.toMms(),
+		s.ToMms(),
 		C.MemeInteger_t(0),
 		(*C.uchar)(unsafe.Pointer(&b[0])), C.MemeInteger_t(len(b)),
 		C.MemeFlag_CaseSensitive))
 }
 
-func (s *String) indexOfWithStartIndexGoStr(str string, startIndex int) int {
+func (s *String) IndexOfWithStartIndexGoStr(str string, startIndex int) int {
 	b := []byte(str)
 	return int(C.MemeString_indexOfWithUtf8bytes(
-		s.toMms(),
+		s.ToMms(),
 		C.MemeInteger_t(startIndex),
 		(*C.uchar)(unsafe.Pointer(&b[0])), C.MemeInteger_t(len(b)),
 		C.MemeFlag_CaseSensitive))
 }
 
-func (s *String) indexOfCStr(cstr *C.char, len C.size_t) int {
+func (s *String) IndexOfCStr(cstr *C.char, len C.size_t) int {
 	return int(C.MemeString_indexOfWithUtf8bytes(
-		s.toMms(),
-		C.MemeInteger_t(0),
-		(*C.uchar)(unsafe.Pointer(cstr)), C.MemeInteger_t(len),
-		C.MemeFlag_CaseSensitive))
-}
-
-func (s *String) indexOfWithStartIndexCStr(cstr *C.char, len C.size_t, startIndex int) int {
-	return int(C.MemeString_indexOfWithUtf8bytes(
-		s.toMms(),
-		C.MemeInteger_t(startIndex),
-		(*C.uchar)(unsafe.Pointer(cstr)), C.MemeInteger_t(len),
-		C.MemeFlag_CaseSensitive))
-}
-
-func (s *String) lastIndexOfGoStr(str string) int {
-	b := []byte(str)
-	return int(C.MemeString_lastIndexOfWithUtf8bytes(
-		s.toMms(),
-		C.MemeInteger_t(0),
-		(*C.uchar)(unsafe.Pointer(&b[0])), C.MemeInteger_t(len(b)),
-		C.MemeFlag_CaseSensitive))
-}
-
-func (s *String) lastIndexOfWithStartIndexGoStr(str string, startIndex int) int {
-	b := []byte(str)
-	return int(C.MemeString_lastIndexOfWithUtf8bytes(
-		s.toMms(),
-		C.MemeInteger_t(startIndex),
-		(*C.uchar)(unsafe.Pointer(&b[0])), C.MemeInteger_t(len(b)),
-		C.MemeFlag_CaseSensitive))
-}
-
-func (s *String) lastIndexOfCStr(cstr *C.char, len C.size_t) int {
-	return int(C.MemeString_lastIndexOfWithUtf8bytes(
-		s.toMms(),
+		s.ToMms(),
 		C.MemeInteger_t(0),
 		(*C.uchar)(unsafe.Pointer(cstr)), C.MemeInteger_t(len),
 		C.MemeFlag_CaseSensitive))
 }
 
-func (s *String) lastIndexOfWithStartIndexCStr(cstr *C.char, len C.size_t, startIndex int) int {
+func (s *String) IndexOfWithStartIndexCStr(cstr *C.char, len C.size_t, startIndex int) int {
+	return int(C.MemeString_indexOfWithUtf8bytes(
+		s.ToMms(),
+		C.MemeInteger_t(startIndex),
+		(*C.uchar)(unsafe.Pointer(cstr)), C.MemeInteger_t(len),
+		C.MemeFlag_CaseSensitive))
+}
+
+func (s *String) LastIndexOfGoStr(str string) int {
+	b := []byte(str)
 	return int(C.MemeString_lastIndexOfWithUtf8bytes(
-		s.toMms(),
+		s.ToMms(),
+		C.MemeInteger_t(0),
+		(*C.uchar)(unsafe.Pointer(&b[0])), C.MemeInteger_t(len(b)),
+		C.MemeFlag_CaseSensitive))
+}
+
+func (s *String) LastIndexOfWithStartIndexGoStr(str string, startIndex int) int {
+	b := []byte(str)
+	return int(C.MemeString_lastIndexOfWithUtf8bytes(
+		s.ToMms(),
+		C.MemeInteger_t(startIndex),
+		(*C.uchar)(unsafe.Pointer(&b[0])), C.MemeInteger_t(len(b)),
+		C.MemeFlag_CaseSensitive))
+}
+
+func (s *String) LastIndexOfCStr(cstr *C.char, len C.size_t) int {
+	return int(C.MemeString_lastIndexOfWithUtf8bytes(
+		s.ToMms(),
+		C.MemeInteger_t(0),
+		(*C.uchar)(unsafe.Pointer(cstr)), C.MemeInteger_t(len),
+		C.MemeFlag_CaseSensitive))
+}
+
+func (s *String) LastIndexOfWithStartIndexCStr(cstr *C.char, len C.size_t, startIndex int) int {
+	return int(C.MemeString_lastIndexOfWithUtf8bytes(
+		s.ToMms(),
 		C.MemeInteger_t(startIndex),
 		(*C.uchar)(unsafe.Pointer(cstr)), C.MemeInteger_t(len),
 		C.MemeFlag_CaseSensitive))
 }
 
 // match count
-func (s *String) matchCountGoStr(str string) int {
+func (s *String) MatchCountGoStr(str string) int {
 	b := []byte(str)
 	return int(C.MemeString_matchCountWithUtf8bytes(
-		s.toMms(),
+		s.ToMms(),
 		C.MemeInteger_t(0),
 		(*C.uchar)(unsafe.Pointer(&b[0])), C.MemeInteger_t(len(b)),
 		C.MemeFlag_CaseSensitive))
 }
 
-func (s *String) matchCountWithStartIndexGoStr(str string, startIndex int) int {
+func (s *String) MatchCountWithStartIndexGoStr(str string, startIndex int) int {
 	b := []byte(str)
 	return int(C.MemeString_matchCountWithUtf8bytes(
-		s.toMms(),
+		s.ToMms(),
 		C.MemeInteger_t(startIndex),
 		(*C.uchar)(unsafe.Pointer(&b[0])), C.MemeInteger_t(len(b)),
 		C.MemeFlag_CaseSensitive))
 }
 
-func (s *String) matchCountCStr(cstr *C.char, len C.size_t) int {
+func (s *String) MatchCountCStr(cstr *C.char, len C.size_t) int {
 	return int(C.MemeString_matchCountWithUtf8bytes(
-		s.toMms(),
+		s.ToMms(),
 		C.MemeInteger_t(0),
 		(*C.uchar)(unsafe.Pointer(cstr)), C.MemeInteger_t(len),
 		C.MemeFlag_CaseSensitive))
 }
 
-func (s *String) matchCountWithStartIndexCStr(cstr *C.char, len C.size_t, startIndex int) int {
+func (s *String) MatchCountWithStartIndexCStr(cstr *C.char, len C.size_t, startIndex int) int {
 	return int(C.MemeString_matchCountWithUtf8bytes(
-		s.toMms(),
+		s.ToMms(),
 		C.MemeInteger_t(startIndex),
 		(*C.uchar)(unsafe.Pointer(cstr)), C.MemeInteger_t(len),
 		C.MemeFlag_CaseSensitive))
 }
 
 // start match
-func (s *String) startMatchGoStr(str string) int {
+func (s *String) StartMatchGoStr(str string) int {
 	b := []byte(str)
 	return int(C.MemeString_startsMatchWithUtf8bytes(
-		s.toMms(),
+		s.ToMms(),
 		(*C.uchar)(unsafe.Pointer(&b[0])), C.MemeInteger_t(len(b)),
 		C.MemeFlag_CaseSensitive))
 }
 
 // end match
-func (s *String) endMatchGoStr(str string) int {
+func (s *String) EndMatchGoStr(str string) int {
 	b := []byte(str)
 	return int(C.MemeString_endsMatchWithUtf8bytes(
-		s.toMms(),
+		s.ToMms(),
 		(*C.uchar)(unsafe.Pointer(&b[0])), C.MemeInteger_t(len(b)),
 		C.MemeFlag_CaseSensitive))
 }
 
 // swap
-func (s *String) swap(other *String) {
+func (s *String) Swap(other *String) {
 	C.MemeString_swap(
-		s.toMms(),
-		other.toMms())
+		s.ToMms(),
+		other.ToMms())
 }
 
-func (s *String) splitGoStr(str string) ([]*String, error) {
+func (s *String) SplitGoStr(str string) ([]*String, error) {
 	stacks := make([]C.mms_stack_t, 4)
 	stacksCount := C.MemeInteger_t(0)
 	b := []byte(str)
@@ -440,7 +440,7 @@ func (s *String) splitGoStr(str string) ([]*String, error) {
 	for index := C.MemeInteger_t(0); index != C.MemeInteger_t(-1); {
 		stacksCount = C.MemeInteger_t(len(stacks))
 		result := C.MemeString_split(
-			s.toMms(),
+			s.ToMms(),
 			(*C.char)(unsafe.Pointer(&b[0])), C.MemeInteger_t(len(b)),
 			C.MemeFlag_KeepEmptyParts,
 			C.MemeFlag_AllSensitive,
@@ -455,15 +455,15 @@ func (s *String) splitGoStr(str string) ([]*String, error) {
 	return list, nil
 }
 
-func (s *String) split(str *String) ([]*String, error) {
+func (s *String) Split(str *String) ([]*String, error) {
 	stacks := make([]C.mms_stack_t, 4)
 	stacksCount := C.MemeInteger_t(0)
 	var list []*String
 	for index := C.MemeInteger_t(0); index != C.MemeInteger_t(-1); {
 		stacksCount = C.MemeInteger_t(len(stacks))
 		result := C.MemeString_split(
-			s.toMms(),
-			str.cstr(), str.sizeToInteger(),
+			s.ToMms(),
+			str.CStr(), str.SizeToInteger(),
 			C.MemeFlag_KeepEmptyParts,
 			C.MemeFlag_AllSensitive,
 			(*C.mms_stack_t)(unsafe.Pointer(&stacks[0])), &stacksCount, &index)
@@ -477,8 +477,8 @@ func (s *String) split(str *String) ([]*String, error) {
 	return list, nil
 }
 
-//export mmsinvoke_match_cond_byte_fn
-func mmsinvoke_match_cond_byte_fn(b C.MemeByte_t, userdata unsafe.Pointer) C.MemeInteger_t {
+//export mmgoinvoke_match_cond_byte_fn
+func mmgoinvoke_match_cond_byte_fn(b C.MemeByte_t, userdata unsafe.Pointer) C.MemeInteger_t {
 	param := (*InvokeMatchParameter)(userdata)
 	if param.condFn != nil {
 		return C.MemeInteger_t(param.condFn(byte(b), param.userdata))
